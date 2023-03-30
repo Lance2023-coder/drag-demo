@@ -2,7 +2,7 @@
  * @Author: zhuotuo
  * @Date: 2023-03-30 08:44:27
  * @LastEditors: zhuotuo
- * @LastEditTime: 2023-03-30 08:44:45
+ * @LastEditTime: 2023-03-30 11:06:32
  * @Description: 
  */
 export const getValueByPath = function(object, prop) {
@@ -49,4 +49,37 @@ export const initRequestAnimationFrame = function () {
       clearTimeout(id);
     };
   }
+}
+
+export const ContextMenu = function (options) {
+  // 唯一实例
+  let instance;
+
+  // 创建实例方法
+  function createMenu() {
+    const ul = document.createElement("ul");
+    ul.classList.add("custom-context-menu");
+    const { menus } = options;
+    if (menus && menus.length > 0) {
+      for (let menu of menus) {
+        const li = document.createElement("li");
+        li.textContent = menu.name;
+        li.onclick = menu.onClick;
+        ul.appendChild(li);
+      }
+    }
+    const body = document.querySelector("body");
+    body.appendChild(ul);
+    return ul;
+  }
+
+  return {
+    // 获取实例的唯一方式
+    getInstance: function () {
+      if (!instance) {
+        instance = createMenu();
+      }
+      return instance;
+    },
+  };
 }

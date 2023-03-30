@@ -2,7 +2,7 @@
  * @Author: zhuotuo
  * @Date: 2023-03-30 08:41:01
  * @LastEditors: zhuotuo
- * @LastEditTime: 2023-03-30 08:48:31
+ * @LastEditTime: 2023-03-30 10:50:42
  * @Description: 
 -->
 <template>
@@ -24,12 +24,12 @@ export default {
   name: "DragSelectOption",
   props: {
     value: {
-      required: true
+      required: true,
     },
     // 用于选择项排序
     itemIndex: {
-      required: true
-    }
+      required: true,
+    },
   },
 
   inject: ["vueDragSelect"],
@@ -53,28 +53,26 @@ export default {
       return this.contains(this.vueDragSelect.value, this.value);
     },
     itemStyle() {
-      const margin = this.vueDragSelect.itemMargin.map(item => item + 'px').join(' ')
+      const margin = this.vueDragSelect.itemMargin
+        .map((item) => item + "px")
+        .join(" ");
       return {
         width: `${this.vueDragSelect.itemWidth}px`,
         height: `${this.vueDragSelect.itemHeight}px`,
         margin,
-      }
-    }
+      };
+    },
   },
 
   methods: {
     getItemStyle() {
-      const {
-        offsetTop,
-        offsetLeft,
-        clientWidth,
-        clientHeight
-      } = this.$refs.vueDragSelectOption;
+      const { offsetTop, offsetLeft, clientWidth, clientHeight } =
+        this.$refs.vueDragSelectOption;
       return {
         top: offsetTop,
         left: offsetLeft,
         width: clientWidth,
-        height: clientHeight
+        height: clientHeight,
       };
     },
     contains(arr = [], target) {
@@ -84,7 +82,7 @@ export default {
         const valueKey = this.vueDragSelect.valueKey;
         return (
           arr &&
-          arr.some(item => {
+          arr.some((item) => {
             return (
               getValueByPath(item, valueKey) ===
               getValueByPath(target, valueKey)
@@ -95,11 +93,11 @@ export default {
     },
     clickItem() {
       this.vueDragSelect.clickSelect(this);
-    }
+    },
   },
   beforeDestroy() {
     const index = this.vueDragSelect.options.indexOf(this);
     this.vueDragSelect.onOptionDestroy(index);
-  }
+  },
 };
 </script>

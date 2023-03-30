@@ -2,7 +2,11 @@
   <div class="vue-drag-select" ref="vueDragSelect">
     <div class="select-wrapper" @mousedown="onMouseDown" :style="wrapperStyle">
       <slot></slot>
-      <div v-show="mouseDown" class="vue-drag-select-box" :style="selectionBoxStyling"></div>
+      <div
+        v-show="mouseDown"
+        class="vue-drag-select-box"
+        :style="selectionBoxStyling"
+      ></div>
     </div>
   </div>
 </template>
@@ -15,55 +19,55 @@ export default {
   props: {
     value: {
       type: Array,
-      default: function() {
+      default: function () {
         return [];
-      }
+      },
     },
     valueKey: {
       type: String,
-      default: "value"
+      default: "value",
     },
     itemWidth: {
       type: Number,
-      default: 100
+      default: 50,
     },
     itemHeight: {
       type: Number,
-      default: 105
+      default: 50,
     },
     itemMargin: {
       type: Array,
       default() {
-        return [20,20,20,20]
+        return [20, 20, 20, 20];
       },
       validator(val) {
-        return [1,2,3,4].includes(val.length)
-      }
+        return [1, 2, 3, 4].includes(val.length);
+      },
     },
     warpperPadding: {
       type: Array,
       default() {
-        return [20,20,20,20]
+        return [20, 20, 20, 20];
       },
       validator(val) {
-        return [1,2,3,4].includes(val.length)
-      }
+        return [1, 2, 3, 4].includes(val.length);
+      },
     },
     // 自动滚动速度 慢速模式
     slowSpeed: {
       type: Number,
-      default: 0
+      default: 0,
     },
     // 自动滚动速度 快速模式
     fastSpeed: {
       type: Number,
-      default: 20
+      default: 20,
     },
   },
 
   provide() {
     return {
-      vueDragSelect: this
+      vueDragSelect: this,
     };
   },
 
@@ -93,7 +97,7 @@ export default {
         left: 0,
         top: 0,
         width: 0,
-        height: 0
+        height: 0,
       },
       // 选框最终样式
       selectionBoxStyling: {
@@ -101,16 +105,15 @@ export default {
         top: "0px",
         width: "0px",
         height: "0px",
-        borderWidth: "0px"
+        borderWidth: "0px",
       },
       // 按键状态
-      controlKeyDown: false,
       shiftKeyDown: false,
       scrollSpeedSlow: Math.min(this.slowSpeed, this.fastSpeed),
       scrollSpeedFast: Math.max(this.slowSpeed, this.fastSpeed),
       scrollSpeed: Math.min(this.slowSpeed, this.fastSpeed),
       // 滚动触发，速度基数 暂不对开发者暴露，一般无需改动
-      triggerDistance: 10
+      triggerDistance: 10,
     };
   },
 
@@ -118,25 +121,26 @@ export default {
     this.clientRect = this.$el.getBoundingClientRect();
     this.elementLayout();
     this.detectKey();
-    initRequestAnimationFrame()
+    initRequestAnimationFrame();
   },
 
   computed: {
     currentValue: {
-      get: function() {
+      get: function () {
         return this.value;
       },
-      set: function(val) {
+      set: function (val) {
         this.$emit("input", val);
-      }
+      },
     },
     wrapperStyle() {
-      const padding = this.warpperPadding.map(item => item + 'px').join(' ')
+      const padding = this.warpperPadding.map((item) => item + "px").join(" ");
       return {
         minHeight: `${this.minHeight}px`,
-        padding
-      }
-    }
+        padding,
+        boxSizing: "border-box",
+      };
+    },
   },
 
   methods: {
@@ -150,10 +154,7 @@ export default {
         return;
       }
       if (this.scrollDirection) {
-        if (
-          this.$el.scrollTop + this.$el.offsetHeight >=
-          this.minHeight
-        ) {
+        if (this.$el.scrollTop + this.$el.offsetHeight >= this.minHeight) {
           this.scrollIng = false;
           return;
         } else {
@@ -169,14 +170,14 @@ export default {
       }
       cancelAnimationFrame(this.autoScrollTimer);
       this.computeLastEndPoint();
-      this.autoScrollTimer = window.requestAnimationFrame(this.scrollFn)
+      this.autoScrollTimer = window.requestAnimationFrame(this.scrollFn);
     },
     computeLastEndPoint() {
       if (!this.mouseDown || !this.startPoint || !this.endPoint) return;
       const clientRect = this.clientRect;
       this.lastEndPoint = {
         x: this.endPoint.x - clientRect.left,
-        y: this.endPoint.y - clientRect.top + this.$el.scrollTop
+        y: this.endPoint.y - clientRect.top + this.$el.scrollTop,
       };
       // 选择框属性计算
       const left = Math.min(this.startPoint.x, this.lastEndPoint.x);
@@ -187,13 +188,13 @@ export default {
         left,
         top,
         width,
-        height
+        height,
       };
       this.selectionBoxStyling = {
         left: `${left}px`,
         top: `${top}px`,
         width: `${width}px`,
-        height: `${height}px`
+        height: `${height}px`,
       };
     },
     onMouseDown(event) {
@@ -206,7 +207,7 @@ export default {
       this.mouseDown = true;
       this.startPoint = {
         x: event.pageX - clientRect.left,
-        y: event.pageY - clientRect.top + this.$el.scrollTop
+        y: event.pageY - clientRect.top + this.$el.scrollTop,
       };
       // 开始监听鼠标 移动，抬起 事件
       window.addEventListener("mousemove", this.onMouseMove);
@@ -219,11 +220,11 @@ export default {
       // 外容器底部到client顶部的距离
       const clientBottom = clientRect.top + clientRect.height;
       // 滚动启动、速度 常数值
-      const triggerDistance = this.triggerDistance
+      const triggerDistance = this.triggerDistance;
       // 容器顶部往下 triggerDistance px
-      const clientTopDown = clientRect.top + triggerDistance
+      const clientTopDown = clientRect.top + triggerDistance;
       // 容器底部往上 triggerDistance px
-      const clientBottomUp = clientBottom - triggerDistance
+      const clientBottomUp = clientBottom - triggerDistance;
 
       // 滚动方向
       if (event.pageY > clientBottomUp) {
@@ -241,7 +242,10 @@ export default {
       } else {
         // 开启滚动
         // 在停止滚动状态 和 开启滚动区域
-        const canScroll = (this.scrollDirection && this.$el.scrollTop + clientRect.height < this.minHeight) || (!this.scrollDirection && this.$el.scrollTop > 0)
+        const canScroll =
+          (this.scrollDirection &&
+            this.$el.scrollTop + clientRect.height < this.minHeight) ||
+          (!this.scrollDirection && this.$el.scrollTop > 0);
         if (!this.scrollIng && canScroll) {
           this.boxAutoScroll();
         }
@@ -252,26 +256,27 @@ export default {
       const speedDiff = this.scrollSpeedFast - this.scrollSpeedSlow;
       if (event.pageY <= clientTopDown) {
         if (event.pageY > clientRect.top) {
-          const percent = 1- ((event.pageY - clientRect.top) / triggerDistance);
-          scrollSpeed = this.scrollSpeedSlow + (percent * speedDiff);
+          const percent = 1 - (event.pageY - clientRect.top) / triggerDistance;
+          scrollSpeed = this.scrollSpeedSlow + percent * speedDiff;
         } else {
           scrollSpeed = this.scrollSpeedFast;
         }
       }
       if (event.pageY >= clientBottomUp) {
         if (event.pageY < clientBottom) {
-          const percent = 1 - ((clientBottom - event.pageY) / triggerDistance);
-          scrollSpeed = this.scrollSpeedSlow + (percent * speedDiff);
+          const percent = 1 - (clientBottom - event.pageY) / triggerDistance;
+          scrollSpeed = this.scrollSpeedSlow + percent * speedDiff;
         } else {
           scrollSpeed = this.scrollSpeedFast;
         }
       }
-      if (this.scrollSpeed > this.scrollSpeedFast) this.scrollSpeed = this.scrollSpeedFast;
+      if (this.scrollSpeed > this.scrollSpeedFast)
+        this.scrollSpeed = this.scrollSpeedFast;
       this.scrollSpeed = scrollSpeed;
 
       this.endPoint = {
         x: event.pageX,
-        y: event.pageY
+        y: event.pageY,
       };
 
       if (!this.scrollIng) {
@@ -296,16 +301,16 @@ export default {
         top: "0px",
         width: "0px",
         height: "0px",
-        borderWidth: "0px"
+        borderWidth: "0px",
       };
     },
     computeSelectedItems() {
       const self = this;
-      if (!this.controlKeyDown) {
+      if (!this.shiftKeyDown) {
         this.currentValue = [];
       }
       this.$nextTick(() => {
-        this.options.forEach(item => {
+        this.options.forEach((item) => {
           const itemStyle = item.getItemStyle();
           const isChecked =
             self.selectionBox.left <= itemStyle.left + itemStyle.width &&
@@ -327,87 +332,21 @@ export default {
           left: 0,
           top: 0,
           width: 0,
-          height: 0
+          height: 0,
         };
       });
     },
     clickSelect(target) {
       const self = this;
       const targeValue = target.value;
-      const targetIndex = target.itemIndex;
-      if (self.shiftKeyDown) {
-        const indexArr = [];
-        const allChildren = self.options;
-        const slelectedListLength = self.currentValue.length;
-        // 筛选选中的 index
-        allChildren.forEach(item => {
-          if (item.itemSelected) {
-            indexArr.push(item.itemIndex);
-          }
-        });
-        self.currentValue = [];
-        self.$nextTick(() => {
-          if (slelectedListLength === 0) {
-            allChildren.forEach((item, index) => {
-              if (index <= targetIndex) {
-                self.currentValue.push(item.value);
-              }
-            });
-          } else if (slelectedListLength === 1) {
-            if (indexArr[0] > targetIndex) {
-              allChildren.forEach((item, index) => {
-                if (index >= targetIndex && index <= indexArr[0]) {
-                  self.currentValue.push(item.value);
-                }
-              });
-            } else {
-              allChildren.forEach((item, index) => {
-                if (index <= targetIndex && index >= indexArr[0]) {
-                  self.currentValue.push(item.value);
-                }
-              });
-            }
-          } else if (slelectedListLength >= 2) {
-            const maxIndex = Math.max.apply(null, indexArr);
-            const minIndex = Math.min.apply(null, indexArr);
-            if (targetIndex >= maxIndex) {
-              allChildren.forEach((item, index) => {
-                if (index <= targetIndex && index >= maxIndex) {
-                  self.currentValue.push(item.value);
-                }
-              });
-            } else if (targetIndex >= minIndex && targetIndex < maxIndex) {
-              const nearMinArr = [];
-              indexArr.forEach(item => {
-                if (item >= minIndex && item <= targetIndex) {
-                  nearMinArr.push(item);
-                }
-              });
-              const nearMinIndex = Math.max.apply(null, nearMinArr);
-              allChildren.forEach((item, index) => {
-                if (index >= nearMinIndex && index <= targetIndex) {
-                  self.currentValue.push(item.value);
-                }
-              });
-            } else {
-              allChildren.forEach((item, index) => {
-                if (index >= targetIndex && index <= minIndex) {
-                  self.currentValue.push(item.value);
-                }
-              });
-            }
-          }
-        });
-        return;
-      }
-      if (!self.controlKeyDown) {
+      if (!self.shiftKeyDown) {
         self.currentValue = [];
         self.$nextTick(() => {
           self.currentValue.push(targeValue);
         });
       } else {
         if (target.itemSelected) {
-          const index = self.getIndex(self.currentValue, targeValue)
+          const index = self.getIndex(self.currentValue, targeValue);
           self.currentValue.splice(index, 1);
         } else {
           self.currentValue.push(targeValue);
@@ -420,29 +359,17 @@ export default {
       const isMac = navigator.userAgent.indexOf("Mac OS X") > 0;
       const self = this;
       // 按  Shift_L  Control_L  command
-      window.onkeydown = function(event) {
+      window.onkeydown = function (event) {
         const e = event || window.event;
         if (e && e.keyCode === 16) {
           self.shiftKeyDown = true;
         }
-        if (e && e.keyCode === 17 && isWin) {
-          self.controlKeyDown = true;
-        }
-        if (e && e.keyCode === 91 && isMac) {
-          self.controlKeyDown = true;
-        }
       };
       // 放 Shift_L  Control_L  command
-      window.onkeyup = function(event) {
+      window.onkeyup = function (event) {
         const e = event || window.event;
         if (e && e.keyCode === 16) {
           self.shiftKeyDown = false;
-        }
-        if (e && e.keyCode === 17 && isWin) {
-          self.controlKeyDown = false;
-        }
-        if (e && e.keyCode === 91 && isMac) {
-          self.controlKeyDown = false;
         }
       };
     },
@@ -451,11 +378,10 @@ export default {
       const isObject =
         Object.prototype.toString.call(val).toLowerCase() === "[object object]";
       const valueKey = this.valueKey;
-      return arr.findIndex(item => {
+      return arr.findIndex((item) => {
         if (isObject) {
           return (
-            getValueByPath(item, valueKey) ===
-            getValueByPath(val, valueKey)
+            getValueByPath(item, valueKey) === getValueByPath(val, valueKey)
           );
         } else {
           return item === val;
@@ -464,45 +390,45 @@ export default {
     },
     // 布局函数
     elementLayout() {
-      const marLength = this.itemMargin.length
-      let addWidth, addHeight, transX, transY, wrapperPaddingY
+      const marLength = this.itemMargin.length;
+      let addWidth, addHeight, transX, transY, wrapperPaddingY;
       if (marLength === 1) {
-        addWidth = this.itemMargin[0] * 2
-        addHeight = this.itemMargin[0] * 2
+        addWidth = this.itemMargin[0] * 2;
+        addHeight = this.itemMargin[0] * 2;
       } else if (marLength === 2) {
-        addWidth = this.itemMargin[1] * 2
-        addHeight = this.itemMargin[0] * 2
+        addWidth = this.itemMargin[1] * 2;
+        addHeight = this.itemMargin[0] * 2;
       } else if (marLength === 3) {
-        addWidth = this.itemMargin[1] * 2
-        addHeight = this.itemMargin[0] + this.itemMargin[2]
+        addWidth = this.itemMargin[1] * 2;
+        addHeight = this.itemMargin[0] + this.itemMargin[2];
       } else if (marLength === 4) {
-        addWidth = this.itemMargin[1] + this.itemMargin[3]
-        addHeight = this.itemMargin[0] + this.itemMargin[2]
+        addWidth = this.itemMargin[1] + this.itemMargin[3];
+        addHeight = this.itemMargin[0] + this.itemMargin[2];
       }
       // 元素位置偏移量计算
-      const wrapLength = this.warpperPadding.length
+      const wrapLength = this.warpperPadding.length;
       if (wrapLength === 1) {
-        transX = this.warpperPadding[0]
-        transY = this.warpperPadding[0]
-        wrapperPaddingY = this.warpperPadding[0] * 2
+        transX = this.warpperPadding[0];
+        transY = this.warpperPadding[0];
+        wrapperPaddingY = this.warpperPadding[0] * 2;
       } else if (wrapLength === 2) {
-        transX = this.warpperPadding[1]
-        transY = this.warpperPadding[0]
-        wrapperPaddingY = this.warpperPadding[0] * 2
+        transX = this.warpperPadding[1];
+        transY = this.warpperPadding[0];
+        wrapperPaddingY = this.warpperPadding[0] * 2;
       } else if (wrapLength === 3) {
-        transX = this.warpperPadding[1]
-        transY = this.warpperPadding[0]
-        wrapperPaddingY = this.warpperPadding[0] + this.warpperPadding[2]
+        transX = this.warpperPadding[1];
+        transY = this.warpperPadding[0];
+        wrapperPaddingY = this.warpperPadding[0] + this.warpperPadding[2];
       } else if (wrapLength === 4) {
-        transX = this.warpperPadding[3]
-        transY = this.warpperPadding[0]
-        wrapperPaddingY = this.warpperPadding[0] + this.warpperPadding[2]
+        transX = this.warpperPadding[3];
+        transY = this.warpperPadding[0];
+        wrapperPaddingY = this.warpperPadding[0] + this.warpperPadding[2];
       }
 
-      addWidth = parseInt(addWidth)
-      addHeight = parseInt(addHeight)
-      const itemWidth = this.itemWidth + addWidth
-      const itemHeight = this.itemHeight + addHeight
+      addWidth = parseInt(addWidth);
+      addHeight = parseInt(addHeight);
+      const itemWidth = this.itemWidth + addWidth;
+      const itemHeight = this.itemHeight + addHeight;
       // 容器宽度
       const boxWidth = this.$refs.vueDragSelect.offsetWidth;
       // 一行几个
@@ -514,9 +440,12 @@ export default {
         if (index && !(index % colCount)) {
           vtSite += 1;
         }
-        item.$refs.vueDragSelectOption.style.top = `${vtSite * itemHeight + transY}px`;
-        item.$refs.vueDragSelectOption.style.left = `${(index % colCount) *
-          itemWidth + transX}px`;
+        item.$refs.vueDragSelectOption.style.top = `${
+          vtSite * itemHeight + transY
+        }px`;
+        item.$refs.vueDragSelectOption.style.left = `${
+          (index % colCount) * itemWidth + transX
+        }px`;
       });
       // 解决撑起容器
       this.minHeight = (vtSite + 1) * itemHeight + wrapperPaddingY;
@@ -526,7 +455,7 @@ export default {
       if (index > -1) {
         this.options.splice(index, 1);
       }
-    }
+    },
   },
 
   beforeDestroy() {
@@ -538,7 +467,7 @@ export default {
   updated() {
     this.$nextTick(() => {
       this.clientRect = this.$el.getBoundingClientRect();
-    })
+    });
     this.$nextTick(() => {
       // 源数据发生变化，通知到更新后，先进性排序，在进行重绘
       // Todo: 有性能问题，后期重新改写
@@ -547,7 +476,7 @@ export default {
       });
       this.elementLayout();
     });
-  }
+  },
 };
 </script>
 
@@ -566,6 +495,7 @@ export default {
     padding-left: 10px;
     min-width: 100%;
     min-height: 100%;
+    background-color: lightpink;
   }
   .vue-drag-select-option {
     transition: all 0.6s ease;
@@ -580,3 +510,5 @@ export default {
   transform: translate3d(0, 0, 0);
 }
 </style>
+
+1314
