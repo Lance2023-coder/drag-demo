@@ -2,7 +2,7 @@
  * @Author: zhuotuo
  * @Date: 2023-03-30 08:44:27
  * @LastEditors: zhuotuo
- * @LastEditTime: 2023-03-30 11:06:32
+ * @LastEditTime: 2023-03-30 14:17:32
  * @Description: 
  */
 export const getValueByPath = function(object, prop) {
@@ -59,6 +59,7 @@ export const ContextMenu = function (options) {
   function createMenu() {
     const ul = document.createElement("ul");
     ul.classList.add("custom-context-menu");
+    ul.classList.add("hidden");
     const { menus } = options;
     if (menus && menus.length > 0) {
       for (let menu of menus) {
