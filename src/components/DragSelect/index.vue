@@ -3,6 +3,7 @@
     <div class="result-box">
       <vue-drag-select
         v-model="selectedList"
+        :selectedDOMList.sync="selectedDOMList"
         value-key="name"
         :item-margin="[0, 10, 10, 0]"
         ref="dragSelect"
@@ -21,6 +22,7 @@
 <script>
 import VueDragSelect from './VueDragSelect.vue';
 import DragSelectOption from './DragSelectOption.vue';
+import { ContextMenu } from "./utils";
 
 export default {
   components: {
@@ -30,19 +32,11 @@ export default {
   data() {
     return {
       mood: true,
-      dataList: [
-        {
-          id: 1
-        },
-        {
-          id: 2
-        },
-        {
-          id: 3
-        }
-      ],
+      dataList: [],
       selectedList: [],
-      id: 300
+      selectedDOMList: [],
+      id: 300,
+      menuSinglton: null,
     };
   },
   created() {
@@ -53,27 +47,62 @@ export default {
         name: i
       });
     }
-  },
-  watch: {
-    mood() {
-      clearTimeout(this.timeClick);
-      this.timeClick = setTimeout(() => {
-        this.$refs.dragSelect.elementLayout(200, 230);
-      }, 500);
-    }
+    document.addEventListener("contextmenu", this.handleContextMenu);
+    document.addEventListener("click", this.handleClick);
+    this.initMenu();
   },
   methods: {
-    insertItem() {
-      const { id, name } = this.dataList.reduce((p, v) =>
-        p.id < v.id ? v : p
-      );
-      this.dataList.splice(2, 0, {
-        id: id + 1,
-        name: name + 1,
-        lip: true
+    handleContextMenu(e) {
+      e.preventDefault();
+      let flag = false
+      this.selectedDOMList.forEach(dom => {
+        if (dom.contains(e.target)) {
+          flag = true
+        }
+      })
+      const menus = this.menuSinglton;
+      if (!flag) {
+        this.selectedList = []
+        this.selectedDOMList = []
+        menus.classList.add("hidden");
+        return
+      }
+      menus.style.top = `${e.clientY - 15}px`;
+      menus.style.left = `${e.clientX}px`;
+      menus.classList.remove("hidden");
+    },
+    handleClick() {
+      const menus = this.menuSinglton;
+      menus.classList.add("hidden");
+    },
+    initMenu() {
+      const that = this;
+      const menuSinglton = ContextMenu({
+        menus: [
+          {
+            name: "查看选中项",
+            onClick: function (e) {
+              alert(
+                `选中了${JSON.stringify(
+                  that.selectedList
+                    .map((item) => {
+                      return item.name;
+                    })
+                    .join("、")
+                )}`
+              );
+            },
+          },
+        ],
       });
-    }
-  }
+
+      this.menuSinglton = menuSinglton.getInstance();
+    },
+  },
+  beforeDestroy() {
+    document.removeEventListener("contextmenu", this.handleContextMenu);
+    document.removeEventListener("click", this.handleClick);
+  },
 };
 </script>
 
@@ -106,10 +135,15 @@ export default {
       }
     }
     .selected-item {
-      .item-self {
+      /* .item-self {
         border: 1px solid red;
         border-color: rgb(65, 98, 255);
         box-shadow: rgb(65, 98, 255) 0px 0px 0px 2px !important;
+      } */
+      .item-self {
+        border: 1px solid red;
+        border-color: rgb(65, 98, 255);
+        transform: scale(0.8);
       }
     }
   }
@@ -127,6 +161,44 @@ export default {
   padding: 0 0 0 100px;
   .result-box {
     height: 600px;
+  }
+}
+</style>
+
+<style lang="scss">
+.custom-context-menu {
+  position: fixed;
+  z-index: 9999;
+  border: 1px solid #ccc;
+  list-style: none;
+  padding: 0;
+  border-radius: 4px;
+  overflow: hidden;
+
+  &.hidden {
+    display: none;
+  }
+
+  li {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f0f2f5;
+    user-select: none;
+    transition: all 0.1s;
+    background-color: #fff;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      cursor: pointer;
+      background-color: #0170fe;
+      color: #fff;
+    }
+
+    &:active {
+      background-color: #f0f2f7;
+    }
   }
 }
 </style>

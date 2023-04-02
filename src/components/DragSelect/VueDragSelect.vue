@@ -59,6 +59,12 @@ export default {
       type: Number,
       default: 20
     },
+    selectedDOMList: {
+      type: Array,
+      default() {
+        return []
+      }
+    }
   },
   provide() {
     return {
@@ -102,7 +108,6 @@ export default {
         borderWidth: "0px"
       },
       // 按键状态
-      controlKeyDown: false,
       shiftKeyDown: false,
       scrollSpeedSlow: Math.min(this.slowSpeed, this.fastSpeed),
       scrollSpeedFast: Math.max(this.slowSpeed, this.fastSpeed),
@@ -291,11 +296,12 @@ export default {
     },
     computeSelectedItems() {
       const self = this;
-      if (!this.controlKeyDown) {
+      if (!this.shiftKeyDown) {
         this.currentValue = [];
+        this.resetDOM()
       }
       this.$nextTick(() => {
-        this.options.forEach(item => {
+        this.options.forEach((item, index) => {
           const itemStyle = item.getItemStyle();
           const isChecked =
             self.selectionBox.left <= itemStyle.left + itemStyle.width &&
@@ -307,8 +313,10 @@ export default {
             const optionIndex = self.currentValue.indexOf(item.value);
             if (optionIndex > -1) {
               self.currentValue.splice(optionIndex, 1);
+              this.removeDOM(optionIndex)
             } else {
               self.currentValue.push(item.value);
+              this.addDOM(item)
             }
           }
         });
@@ -325,83 +333,46 @@ export default {
       const self = this;
       const targeValue = target.value;
       const targetIndex = target.itemIndex;
-      if (self.shiftKeyDown) {
-        const indexArr = [];
-        const allChildren = self.options;
-        const slelectedListLength = self.currentValue.length;
-        // 筛选选中的 index
-        allChildren.forEach(item => {
-          if (item.itemSelected) {
-            indexArr.push(item.itemIndex);
-          }
-        });
+
+      // 原逻辑
+      // if (!self.shiftKeyDown) {
+        // self.currentValue = [];
+        // self.$nextTick(() => {
+        //   self.currentValue.push(targeValue);
+        // });
+      // } else {
+        // if (target.itemSelected) {
+        //   const index = self.getIndex(self.currentValue, targeValue)
+        //   self.currentValue.splice(index, 1);
+        // } else {
+        //   self.currentValue.push(targeValue);
+        // }
+      //}
+
+      if (!self.shiftKeyDown) {
+        const index = self.getIndex(self.currentValue, targeValue)
         self.currentValue = [];
+        this.resetDOM()
         self.$nextTick(() => {
-          if (slelectedListLength === 0) {
-            allChildren.forEach((item, index) => {
-              if (index <= targetIndex) {
-                self.currentValue.push(item.value);
-              }
-            });
-          } else if (slelectedListLength === 1) {
-            if (indexArr[0] > targetIndex) {
-              allChildren.forEach((item, index) => {
-                if (index >= targetIndex && index <= indexArr[0]) {
-                  self.currentValue.push(item.value);
-                }
-              });
-            } else {
-              allChildren.forEach((item, index) => {
-                if (index <= targetIndex && index >= indexArr[0]) {
-                  self.currentValue.push(item.value);
-                }
-              });
-            }
-          } else if (slelectedListLength >= 2) {
-            const maxIndex = Math.max.apply(null, indexArr);
-            const minIndex = Math.min.apply(null, indexArr);
-            if (targetIndex >= maxIndex) {
-              allChildren.forEach((item, index) => {
-                if (index <= targetIndex && index >= maxIndex) {
-                  self.currentValue.push(item.value);
-                }
-              });
-            } else if (targetIndex >= minIndex && targetIndex < maxIndex) {
-              const nearMinArr = [];
-              indexArr.forEach(item => {
-                if (item >= minIndex && item <= targetIndex) {
-                  nearMinArr.push(item);
-                }
-              });
-              const nearMinIndex = Math.max.apply(null, nearMinArr);
-              allChildren.forEach((item, index) => {
-                if (index >= nearMinIndex && index <= targetIndex) {
-                  self.currentValue.push(item.value);
-                }
-              });
-            } else {
-              allChildren.forEach((item, index) => {
-                if (index >= targetIndex && index <= minIndex) {
-                  self.currentValue.push(item.value);
-                }
-              });
-            }
+          if (index >= 0) {
+            self.currentValue.splice(index, 1);
+            this.removeDOM(index)
+          } else {
+            self.currentValue.push(targeValue);
+            this.addDOM(target)
           }
-        });
-        return;
-      }
-      if (!self.controlKeyDown) {
-        self.currentValue = [];
-        self.$nextTick(() => {
-          self.currentValue.push(targeValue);
         });
       } else {
-        if (target.itemSelected) {
-          const index = self.getIndex(self.currentValue, targeValue)
-          self.currentValue.splice(index, 1);
-        } else {
-          self.currentValue.push(targeValue);
-        }
+        const index = self.getIndex(self.currentValue, targeValue)
+        self.$nextTick(() => {
+          if (index >= 0) {
+            self.currentValue.splice(index, 1);
+            this.removeDOM(index)
+          } else {
+            self.currentValue.push(targeValue);
+            this.addDOM(target)
+          }
+        });
       }
     },
     // 监听按键
@@ -415,24 +386,12 @@ export default {
         if (e && e.keyCode === 16) {
           self.shiftKeyDown = true;
         }
-        if (e && e.keyCode === 17 && isWin) {
-          self.controlKeyDown = true;
-        }
-        if (e && e.keyCode === 91 && isMac) {
-          self.controlKeyDown = true;
-        }
       };
       // 放 Shift_L  Control_L  command
       window.onkeyup = function(event) {
         const e = event || window.event;
         if (e && e.keyCode === 16) {
           self.shiftKeyDown = false;
-        }
-        if (e && e.keyCode === 17 && isWin) {
-          self.controlKeyDown = false;
-        }
-        if (e && e.keyCode === 91 && isMac) {
-          self.controlKeyDown = false;
         }
       };
     },
@@ -516,6 +475,17 @@ export default {
       if (index > -1) {
         this.options.splice(index, 1);
       }
+    },
+    addDOM(item) {
+      this.selectedDOMList.push(item.$slots.default[0].elm)
+      this.$emit('update:selectedDOMList', this.selectedDOMList)
+    },
+    removeDOM(index) {
+      this.selectedDOMList.splice(index, 1)
+      this.$emit('update:selectedDOMList', this.selectedDOMList)
+    },
+    resetDOM() {
+      this.$emit('update:selectedDOMList', [])
     }
   },
   beforeDestroy() {

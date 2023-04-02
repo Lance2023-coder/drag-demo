@@ -28,7 +28,7 @@ export default {
   data() {
     return {};
   },
-  created() {
+  mounted() {
     this.vueDragSelect.options.push(this);
   },
   computed: {
