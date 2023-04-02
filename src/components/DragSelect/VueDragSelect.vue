@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import { initRequestAnimationFrame, getValueByPath } from '../utils'
+import { initRequestAnimationFrame, getValueByPath } from './utils'
 
 export default {
   name: "vueDragSelect",
@@ -25,11 +25,11 @@ export default {
     },
     itemWidth: {
       type: Number,
-      default: 100
+      default: 50
     },
     itemHeight: {
       type: Number,
-      default: 105
+      default: 50
     },
     itemMargin: {
       type: Array,
@@ -495,7 +495,8 @@ export default {
       // 容器宽度
       const boxWidth = this.$refs.vueDragSelect.offsetWidth;
       // 一行几个
-      const colCount = parseInt(boxWidth / itemWidth);
+      // const colCount = parseInt(boxWidth / itemWidth);
+      const colCount = 16
       // 行基数
       let vtSite = 0;
       this.options.forEach((item, index) => {

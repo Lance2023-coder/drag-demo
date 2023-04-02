@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import { getValueByPath } from '../utils'
+import { getValueByPath } from './utils'
 
 export default {
   name: "DragSelectOption",
