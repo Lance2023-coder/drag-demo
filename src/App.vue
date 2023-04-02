@@ -1,45 +1,57 @@
 <template>
-  <div id="app">
+  <div :class="['index-page', mood ? '' : 'bigger']">
+    <div class="tool-box">
+      <div class="btn" @click="mood = !mood">{{mood ? '点击变宽' : '点击收缩'}}</div>
+      <div class="btn" @click="insertItem">添加一个皮卡丘</div>
+      <div class="tips">
+        可以尝试
+        <code>Ctrl</code>、
+        <code>command</code> 和
+        <code>shift</code> 按键
+      </div>
+    </div>
     <div class="result-box">
-      <VueDragSelect
+      <vue-drag-select
         v-model="selectedList"
         value-key="name"
         :item-margin="[0, 10, 10, 0]"
-        :warpper-padding="[20, 20, 20, 20]"
         ref="dragSelect"
       >
-        <DragSelectOption
-          v-for="(item, index) in dataList"
-          :key="item.id"
-          :value="item"
-          :item-index="index"
-        >
+        <drag-select-option v-for="(item, index) in dataList" :key="item.id" :value="item" :item-index="index">
           <div class="item-self">
             {{ item.name }}
           </div>
-        </DragSelectOption>
-      </VueDragSelect>
+        </drag-select-option>
+      </vue-drag-select>
     </div>
   </div>
 </template>
 
 <script>
-import VueDragSelect from "./components/VueDragSelect.vue";
-import DragSelectOption from "./components/DragSelectOption.vue";
-import { ContextMenu } from "./utils";
+import VueDragSelect from './components/VueDragSelect.vue';
+import DragSelectOption from './components/DragSelectOption.vue';
 
 export default {
   components: {
     VueDragSelect,
-    DragSelectOption,
+    DragSelectOption
   },
   data() {
     return {
       mood: true,
-      dataList: [],
+      dataList: [
+        {
+          id: 1
+        },
+        {
+          id: 2
+        },
+        {
+          id: 3
+        }
+      ],
       selectedList: [],
-      id: 300,
-      menuSinglton: null,
+      id: 300
     };
   },
   created() {
@@ -47,12 +59,9 @@ export default {
     for (let i = 0; i <= 255; i++) {
       this.dataList.push({
         id: i,
-        name: i,
+        name: i
       });
     }
-    document.addEventListener("contextmenu", this.handleContextMenu);
-    document.addEventListener("click", this.handleClick);
-    this.initMenu();
   },
   watch: {
     mood() {
@@ -60,9 +69,8 @@ export default {
       this.timeClick = setTimeout(() => {
         this.$refs.dragSelect.elementLayout(200, 230);
       }, 500);
-    },
+    }
   },
-
   methods: {
     insertItem() {
       const { id, name } = this.dataList.reduce((p, v) =>
@@ -71,120 +79,91 @@ export default {
       this.dataList.splice(2, 0, {
         id: id + 1,
         name: name + 1,
-        lip: true,
+        lip: true
       });
-    },
-    handleContextMenu(e) {
-      e.preventDefault();
-      const menus = this.menuSinglton;
-      menus.style.top = `${e.clientY - 15}px`;
-      menus.style.left = `${e.clientX}px`;
-      menus.classList.remove("hidden");
-    },
-    handleClick() {
-      const menus = this.menuSinglton;
-      menus.classList.add("hidden");
-    },
-    initMenu() {
-      const that = this;
-      const menuSinglton = ContextMenu({
-        menus: [
-          {
-            name: "查看选中项",
-            onClick: function (e) {
-              alert(
-                `选中了${JSON.stringify(
-                  that.selectedList
-                    .map((item) => {
-                      return item.name;
-                    })
-                    .join("、")
-                )}`
-              );
-            },
-          },
-        ],
-      });
-
-      this.menuSinglton = menuSinglton.getInstance();
-    },
-  },
-  beforeDestroy() {
-    document.removeEventListener("contextmenu", this.handleContextMenu);
-  },
+    }
+  }
 };
 </script>
 
-<style lang="scss">
-div::-webkit-scrollbar {
-  display: none;
-}
-
-.result-box {
-  width: 992px;
-  max-height: 90vh;
-  overflow: scroll;
-  box-sizing: border-box;
-  .vue-drag-select {
-    background-color: #fff;
-  }
-  .item-self {
-    width: 100%;
-    height: 100%;
-    border-radius: 4px;
-    border: 1px solid #fff;
-    transition: all 0.3s ease;
-    overflow: hidden;
-    background-color: lightblue;
-    &:hover {
-      box-shadow: 0 4px 10px #e8e8e8;
-    }
-    img {
-      width: 100%;
-    }
-  }
-  .selected-item {
-    .item-self {
-      border: 1px solid red;
-      border-color: rgb(65, 98, 255);
-      transform: scale(0.8);
-    }
-  }
-}
-
-.custom-context-menu {
-  position: fixed;
-  z-index: 9999;
-  border: 1px solid #ccc;
-  list-style: none;
-  padding: 0;
-  border-radius: 4px;
-  overflow: hidden;
-
-  &.hidden {
-    display: none;
-  }
-
-  li {
-    padding: 8px 12px;
-    border-bottom: 1px solid #f0f2f5;
-    user-select: none;
-    transition: all 0.1s;
-    background-color: #fff;
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    &:hover {
-      cursor: pointer;
-      background-color: #0170fe;
+<style lang="scss" scoped>
+.index-page {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  padding: 0 0 0 400px;
+  transition: all 0.3s ease;
+  .tool-box {
+    position: absolute;
+    left: 10px;
+    top: 50px;
+    .btn {
+      width: 200px;
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 10px 20px;
       color: #fff;
+      background-color: #2d8cf0;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      user-select: none;
+      &:hover {
+        background-color: #57a3f3;
+      }
+      &:focus {
+        box-shadow: 0 0 0 2px rgba(45, 140, 240, 0.2);
+      }
+      &:active {
+        background-color: #2d8cf0;
+      }
     }
-
-    &:active {
-      background-color: #f0f2f7;
+    .tips {
+      code {
+        background: #000;
+        color: #fff;
+        padding: 10px;
+        border-radius: 6px;
+      }
     }
+  }
+  .result-box {
+    width: 100%;
+    height: 500px;
+    padding-top: 100px;
+    transition: all 0.3s;
+    .vue-drag-select {
+      background-color: #ddd;
+    }
+    .item-self {
+      width: 100%;
+      height: 100%;
+      border-radius: 4px;
+      border: 1px solid #fff;
+      background-color: #fff;
+      transition: all 0.3s ease;
+      overflow: hidden;
+      &:hover {
+        box-shadow: 0px 2px 20px -2px rgba(0, 0, 0, 0.5);
+      }
+      img {
+        width: 100%;
+      }
+    }
+    .selected-item {
+      .item-self {
+        border: 1px solid red;
+        border-color: rgb(65, 98, 255);
+        box-shadow: rgb(65, 98, 255) 0px 0px 0px 2px !important;
+      }
+    }
+  }
+}
+.bigger {
+  width: 100%;
+  padding: 0 0 0 100px;
+  .result-box {
+    height: 600px;
   }
 }
 </style>
